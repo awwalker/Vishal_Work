@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<title>Dashboard</title>
+	<link rel = "stylesheet" href = "./static/lib/css/bootstrap.min.css">
+	<link rel = "stylesheet" href = "./static/lib/css/keen-dashboards.css">
+	<link rel = "stylesheet" href = "./static/lib/css/dc.css">
+	<link rel = "stylesheet" href = "./static/css/custom.css">
+
+</head>
+<body class = 'application'>
+
+<div class="col-sm-6">
+        <div class="row">
+
+          <!-- Time Chart --> 
+          <div class="col-sm-12">
+            <div class="chart-wrapper">
+              <div class="chart-title">
+                Number of Rape Crimes
+              </div>
+              <div class="chart-stage">
+                <div id="rape-chart"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Time Chart --> 
+ <!-- Map -->  
+      <div class="col-sm-6">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            Distribution of Rape Incidents
+          </div>
+          <div class="chart-stage">
+            <div id="us-chart"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Map -->
+
+
+	<script src = "./static/lib/js/jquery.min.js"></script>
+	<script src = "./static/lib/js/bootstrap.min.js"></script>
+	<script src = "./static/lib/js/crossfilter.js"></script>
+	<script src = "./static/lib/js/d3.js"></script>
+	<script src = "./static/lib/js/dc.js"></script>
+	<script src = "./static/lib/js/queue.js"></script>
+	
+	<script src= "./static/lib/js/keen.min.js"></script>
+	<script type = "text/javascript" src= './static/js/graphs.js'></script>
+</body>
+</html>

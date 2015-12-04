@@ -1,0 +1,23 @@
+#number-projects-nd {
+    font-size: 60px;
+}
+
+#total-donations-nd {
+    font-size: 60px;
+}
+
+.dc-chart g.row text {
+    fill: black;
+    font-size: 12px;
+}
+#incident-chart {
+	float: right;
+}
+
+#rape-chart {
+	float: right;
+}
+.dc-chart .deselected circle {
+	stroke: none;
+	fill: rgba(200,0,0,0.2);
+}
