@@ -10,8 +10,8 @@
     fill: black;
     font-size: 12px;
 }
-#incident-chart {
-	float: right;
+#percent-chart {
+	float: center;
 }
 
 #rape-chart {

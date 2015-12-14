@@ -11,33 +11,42 @@
 </head>
 <body class = 'application'>
 
-<div class="col-sm-6">
-        <div class="row">
-
-          <!-- Time Chart --> 
-          <div class="col-sm-12">
-            <div class="chart-wrapper">
-              <div class="chart-title">
-                Number of Rape Crimes
-              </div>
-              <div class="chart-stage">
-                <div id="rape-chart"></div>
-              </div>
-            </div>
-          </div>
-          <!-- Time Chart --> 
- <!-- Map -->  
-      <div class="col-sm-6">
-        <div class="chart-wrapper">
-          <div class="chart-title">
-            Distribution of Rape Incidents
-          </div>
-          <div class="chart-stage">
-            <div id="us-chart"></div>
-          </div>
-        </div>
-      </div>
-      <!-- Map -->
+	<!-- Violent Crime Chart -->
+	<div class="col-sm-12">
+		<div class="chart-wrapper">
+			<div class="chart-title">
+				Yearly Violent Crime Statistics
+			</div>
+			<div class="chart-stage">
+				<div id="violent-rate-chart"></div>
+			</div>
+		</div>
+	</div>
+	<!-- Violent Crime Chart -->
+	<!-- Non-Violent Crime Chart -->
+	<div class = "col-sm-6">
+		<div class = "chart-wrapper">
+			<div class = "chart-title">
+				Yearly Non-Violent Crime Statistics
+			</div>
+			<div class = "chart-stage">
+				<div id = "non-violent-rate-chart"></div>
+			</div>
+		</div>
+	</div>
+	<!-- Non-Violent Crime Chart -->
+	<!-- Map -->
+	<div class="col-sm-6">
+		<div class="chart-wrapper">
+			<div class="chart-title">
+				Distribution of Crime Across the U.S
+			</div>
+			<div class="chart-stage">
+				<div id="us-chart"></div>
+			</div>
+		</div>
+	</div>
+	<!-- Map -->
 
 
 	<script src = "./static/lib/js/jquery.min.js"></script>
@@ -46,7 +55,7 @@
 	<script src = "./static/lib/js/d3.js"></script>
 	<script src = "./static/lib/js/dc.js"></script>
 	<script src = "./static/lib/js/queue.js"></script>
-	
+
 	<script src= "./static/lib/js/keen.min.js"></script>
 	<script type = "text/javascript" src= './static/js/graphs.js'></script>
 </body>
