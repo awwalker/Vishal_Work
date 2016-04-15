@@ -184,6 +184,7 @@ Fix Burglary
 			.dimension(yearsDimension)
 			.group(yearsDimensionGroup, "Rape Rate")
 			.colors('blue')
+			.brushOn(true)
 			//set up rape rate
 			.valueAccessor(function(d){
 				return d.value["Average Rape Rate"];
@@ -193,6 +194,7 @@ Fix Burglary
 			.dimension(yearsDimension)
 			.group(yearsDimensionGroup, "Incarceration Rate")
 			.colors('red')
+			.brushOn(true)
 			.valueAccessor(function(d){
 				return d.value["Average Incarceration Rate"];
 			}),
@@ -201,6 +203,7 @@ Fix Burglary
 			.dimension(yearsDimension)
 			.group(yearsDimensionGroup, "Violent Crime Rate")
 			.colors('green')
+			.brushOn(true)
 			.valueAccessor(function(d){
 				return d.value["Average Violent Crime Rate"];
 			}),
@@ -216,6 +219,7 @@ Fix Burglary
 		dc.lineChart(violentRateChart, "Robbery Rate")
 			.dimension(yearsDimension)
 			.group(yearsDimensionGroup, "Robbery Rate")
+			.brushOn(true)
 			.colors('yellow')
 			.valueAccessor(function(d){
 				return d.value['Average Robbery Rate'];
@@ -225,6 +229,7 @@ Fix Burglary
 			.dimension(yearsDimension)
 			.group(yearsDimensionGroup, "Aggravated Assault Rate")
 			.colors('orange')
+			.brushOn(true)
 			.valueAccessor(function(d){
 				return d.value['Average Aggravated Assualt Rate'];
 			})
@@ -249,7 +254,6 @@ Fix Burglary
 		reduceFieldsRemove(fieldsRates, fieldsAverages),
 		reduceFieldsInit(fieldsRates, fieldsAverages)
 	);
-	console.log(stateDimensionGroup.all());
 	usChart.width(1000)
 	.height(330)
 	.dimension(stateDimension)
