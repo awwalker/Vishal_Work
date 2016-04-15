@@ -20,9 +20,9 @@ function zoom() {
     d3.event.scale + ")");
 };
 var color = d3.scale.threshold()
-                    .domain([1, 2, 3, 15, 27, 40, 100])
-                    .range(["#BF3EFF", "#B23AEE", "#9A32CD", "#68228B",
-                            "#4B0082", "#71637D", "#80080"]);
+                    .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
+                    .range(["#F0F8FF", "#BBFFFF", "#BCD2EE", "#6D9BF1",
+                            "#436EEE", "#2E37FE", "#3232CC", "00008B", "000033"]);
 // Add map layers
 var projection = d3.geo.albersUsa().scale(1000).translate([width / 2, height / 2]);
 var path = d3.geo.path().projection(projection);
