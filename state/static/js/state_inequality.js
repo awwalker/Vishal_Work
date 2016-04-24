@@ -10,10 +10,22 @@
 var width  = 960,
     height = 500,
     centered;
+var margin = {top: 20, right: 80, bottom: 30, left: 50};
+// Variables for selection.
 var years = []; // Years included in dropdown/data.
 for(i = 1917; i < 2013; i++){
     years.push(i);
 }
+
+var metrics = ["Share of Total Wealth Earned by Richest 10%",
+                "Share of Total Wealth Earned by Richest 5%",
+                "Share of Total Wealth Earned by Richest 1%",
+                "Share of Total Wealth Earned by Richest 0.5%",
+                "Share of Total Wealth Earned by Richest 0.1%",
+                "Share of Total Wealth Earned by Richest 0.01%",
+                "Total Income", "Adjusted Gross Income",
+                "Consumer Price Index 2014"
+                ];
 // For choropleth coloring.
 var color = d3.scale.threshold()
                     .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
@@ -32,16 +44,35 @@ var america  = map.append("g")
 var g        = map.append("g");
 var dataMap  = d3.map();
 
+// var x = d3.time.scale().range([0, width / 2]);
+// var y = d3.scale.linear().range([height / 2, 0]);
+// var xAxis = d3.svg.axis().scale(x).orient("bottom");
+// var yAxis = d3.svg.axis().scale(y).orient("left");
+// var graph = d3.select("#rate_chart").append("svg")
+//               .attr("width", width + margin.left + margin.right)
+//               .attr("height", height + margin.top + margin.bottom)
+//               .append("g")
+//               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 // Read in data.
 queue()
     .defer(d3.json, "../static/json/us-named.json") // map.
     .defer(d3.csv, "../static/data/state_inequality.csv", // data.
-                // store each data row as [state, date] in map
-                function(d) { dataMap.set([d.State, new Date(+d.Year, 0, 1)], d); })
+                function(d) {
+                    var yearData = {};
+                    if (d.State in dataMap) {
+                        yearData = dataMap[d.State];
+                        yearData[new Date(+d.Year, 0, 1)] = d;
+                        dataMap[d.State] = yearData;
+                    } else{
+                        var year = new Date(+d.Year, 0, 1);
+                        dataMap[d.State] = d3.map(year, d);
+                    }
+                })
     .await(ready);
-/* SET UP MAIN MAP*/
+/* SET UP MAIN MAP */
 function ready(error, us) {
     if(error) throw error;
+    // console.log(dataMap["California"][new Date(2012, 0, 1)]);
     d3.select("#Loading").style("display", "none") // Hide loading message.
     america.selectAll("path")
         .data(topojson.feature(us, us.objects["states"]).features)
@@ -56,16 +87,6 @@ function ready(error, us) {
         }))
         .attr("id", "states-borders")
         .attr("d", path);
-
-    var metrics = ["Share of Total Wealth Earned by Richest 10%",
-                    "Share of Total Wealth Earned by Richest 5%",
-                    "Share of Total Wealth Earned by Richest 1%",
-                    "Share of Total Wealth Earned by Richest 0.5%",
-                    "Share of Total Wealth Earned by Richest 0.1%",
-                    "Share of Total Wealth Earned by Richest 0.01%",
-                    "Total Income", "Adjusted Gross Income",
-                    "Consumer Price Index 2014"
-                    ];
     /* SET UP DROPDOWN MENU */
     var checkOption = function(e) {
         if(e === metricselect) {
@@ -97,25 +118,19 @@ function ready(error, us) {
         if(currentState != "Puerto Rico" &&
             currentState !="Virgin Islands of the United States" &&
             currentState != "states-borders") {
-            return color(dataMap.get(
-                // Color map based on most recent data to start.
-                [currentState, new Date(2012, 0, 1)])[selectedMetric]);
-        }
-    };
+            return color( dataMap[currentState][new Date(2012, 0, 1)][selectedMetric])
+            };
+    }
     var state = america.selectAll("path");
     state.attr("fill", colorMap);
 
     /* SUPPORT STATE CLICKING */
-    // On click will return data from given year and reshifts bar graphs
-    // to center around that state and year
     var selectedState = "United States"; // global state
     state.on("click", function() {
         selectedState = d3.select(this).attr("id")
-        years.forEach(function(d){
-            console.log(dataMap.get([selectedState, new Date(+d, 0, 1)])[selectedMetric]);
-            console.log(color(dataMap.get([selectedState, new Date(+d, 0, 1)])[selectedMetric]));
-        });
+        console.log(dataMap[selectedState]);
     });
+
 };
 
 // d3.select(self.frameElement).style("height", height + "px");
