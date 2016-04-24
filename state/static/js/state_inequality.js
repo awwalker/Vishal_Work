@@ -72,7 +72,7 @@ queue()
 /* SET UP MAIN MAP */
 function ready(error, us) {
     if(error) throw error;
-    // console.log(dataMap["California"][new Date(2012, 0, 1)]);
+    console.log(dataMap);
     d3.select("#Loading").style("display", "none") // Hide loading message.
     america.selectAll("path")
         .data(topojson.feature(us, us.objects["states"]).features)
