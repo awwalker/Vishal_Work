@@ -12,11 +12,6 @@ var width  = 960,
     centered;
 var margin = {top: 20, right: 80, bottom: 30, left: 50};
 // Variables for selection.
-var years = []; // Years included in dropdown/data.
-for(i = 1917; i < 2013; i++){
-    years.push(i);
-}
-
 var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Share of Total Wealth Earned by Richest 5%",
                 "Share of Total Wealth Earned by Richest 1%",
@@ -26,6 +21,16 @@ var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Total Income", "Adjusted Gross Income",
                 "Consumer Price Index 2014"
                 ];
+var menu = d3.select("#metric_drop")
+             .on("change", change);
+    menu.selectAll("option")
+        .data(d3.values(metrics))
+        .enter()
+        .append("option")
+        .attr("value", function(d) {return d;})
+        .text(function(d) {return d;});
+
+var altKey;
 // For choropleth coloring.
 var color = d3.scale.threshold()
                     .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
@@ -44,31 +49,25 @@ var america  = map.append("g")
 var g        = map.append("g");
 var dataMap  = d3.map();
 
-// var x = d3.time.scale().range([0, width / 2]);
-// var y = d3.scale.linear().range([height / 2, 0]);
-// var xAxis = d3.svg.axis().scale(x).orient("bottom");
-// var yAxis = d3.svg.axis().scale(y).orient("left");
-// var graph = d3.select("#rate_chart").append("svg")
-//               .attr("width", width + margin.left + margin.right)
-//               .attr("height", height + margin.top + margin.bottom)
-//               .append("g")
-//               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 // Read in data.
 queue()
     .defer(d3.json, "../static/json/us-named.json") // map.
     .defer(d3.csv, "../static/data/state_inequality.csv", // data.
                 function(d) {
-                    var yearData = {};
-                    if (d.State in dataMap) {
-                        yearData = dataMap[d.State];
-                        yearData[new Date(+d.Year, 0, 1)] = d;
-                        dataMap[d.State] = yearData;
-                    } else{
-                        var year = new Date(+d.Year, 0, 1);
-                        dataMap[d.State] = d3.map(year, d);
-                    }
+                    data = d;
                 })
     .await(ready);
+
+function change() {
+    clearTimeout(timeout);
+    d3.transition()
+      .duration(altKey ? 7500 : 1500)
+      .each(redraw);
+}
+
+function redraw() {
+    
+}
 /* SET UP MAIN MAP */
 function ready(error, us) {
     if(error) throw error;
@@ -87,30 +86,6 @@ function ready(error, us) {
         }))
         .attr("id", "states-borders")
         .attr("d", path);
-    /* SET UP DROPDOWN MENU */
-    var checkOption = function(e) {
-        if(e === metricselect) {
-            return d3.select(this).attr("selected", "selected");
-        }
-    };
-    // Allow options to show up.
-    var selectedMetric = "Share of Total Wealth Earned by Richest 10%";
-    // Allow menu to change current metric.
-    function metricChanged() {
-        selectedMetric = d3.event.target.value; // Change metric.
-        state.attr("fill", colorMap); // Recolor.
-    }
-    var metricDrop = d3.select("#metric_drop")
-                        .append("select")
-                        .attr("id", "metricselect")
-                        .on("change", metricChanged);
-        metricDrop.selectAll("option")
-                    .data(d3.values(metrics))
-                    .enter()
-                    .append("option")
-                    .attr("value", function(d) {return d;})
-                    .text(function(d) {return d;});
-        metricDrop.selectAll("option").each(checkOption);
 
     /* CHOROPLETH COLORING */
     function colorMap(){
