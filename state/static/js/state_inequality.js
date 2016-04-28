@@ -89,16 +89,16 @@ var yAxis = d3.svg.axis()
 
 // Function to refresh map and graph on dropdown change.
 function change() {
-    // clearTimeout(timeout);
+    clearTimeout(timeout);
     d3.transition()
       .duration(altKey ? 7500 : 1500)
       .each(redraw);
 }
 // Automatically change value after a few seconds.
-// var timeout = setTimeout(function() {
-//     menu.property("value", metrics[0]).node().focus();
-//     change();
-// }, 7000);
+var timeout = setTimeout(function() {
+    menu.property("value", metrics[0]).node().focus();
+    change();
+}, 7000);
 
 // Draw basic map template.
 d3.json("../static/json/us-named.json", function(error, us) {
