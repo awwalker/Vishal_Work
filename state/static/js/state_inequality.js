@@ -46,6 +46,7 @@ menu.selectAll("option")
 menu.selectAll("option").each(checkOption);
 
 // For choropleth coloring.
+// Need to add better range domain values...
 var color = d3.scale.threshold()
                     .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
                     .range(["#F0F8FF", "#BBFFFF", "#BCD2EE", "#6D9BF1",
