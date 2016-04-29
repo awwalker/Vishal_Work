@@ -1,4 +1,4 @@
-// Globals for viz production.
+// Globals for visualization production.
 var width  = 960,
     height = 500,
     margin = {top: 40, right: 80, bottom: 30, left: 200},
@@ -83,16 +83,21 @@ var yAxis = d3.svg.axis()
 
 // Function to refresh map and graph on dropdown change.
 function change() {
-    clearTimeout(timeout);
     d3.transition()
       .duration(altKey ? 7500 : 1500)
       .each(redraw);
 }
-// Automatically change value after a few seconds.
-var timeout = setTimeout(function() {
-    menu.property("value", metrics[0]).node().focus();
-    change();
-}, 7000);
+// Handler for clicking on states - Reveals the line for that state.
+function uncoverLine() {
+    currentState = d3.select(this).attr("id");
+    // Reformat names with spaces to include _ instead.
+    if (currentState.includes(" ")){
+        res = currentState.split(" ");
+        currentState = res[0] + "_" + res[1];
+    }
+    d3.selectAll("#" + currentState).style("opacity", "1");
+}
+
 // Must read in and draw map first so that data is used only after available.
 d3.json("../static/json/us-named.json", function(error, us) {
         drawMap(error, us);
@@ -168,7 +173,12 @@ function redraw(error) {
                      .data(transpose);
     var stateEnter = state.enter().append("g")
                           .attr("class", "state")
-                          .attr("id", function(d) { return d.name; });
+                          .attr("id", function(d) {
+                              if ( d.name.includes(" ")) {
+                                  var res = d.name.split(" ");
+                                  return res[0] + "_" + res[1];
+                              }
+                              return d.name; });
 /* TO DO */
 // Restrict first call to graph drawing to just US line.
 // Only draw in other states when they are clicked.
@@ -176,15 +186,34 @@ function redraw(error) {
               .attr("class", "line")
               .attr("d", function(d) { return line(d.values); })
               .attr("fill", "none")
-              .style("stroke", function(d) {return graphColor(d.name); });
+              .attr("id", function(d) {
+                  if ( d.name.includes(" ")) {
+                      var res = d.name.split(" ");
+                      return res[0] + "_" + res[1];
+                  }
+                  return d.name;
+               })
+              .style("stroke", function(d) { return graphColor(d.name); });
     stateEnter.append("text")
               .attr("class", "names")
-              .datum(function(d) {return {name: d.name, value: d.values[d.values.length - 1]}; })
+              .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
               .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.stat) + ")"; })
               .attr("x", 4)
               .attr("dy", ".1em")
+              .attr("id", function(d) {
+                  if ( d.name.includes(" ")) {
+                      var res = d.name.split(" ");
+                      return res[0] + "_" + res[1];
+                  }
+                  return d.name; })
               .text(function(d) { return d.name; });
+    //Initially set all lines and names to not show
+    d3.selectAll(".line").style("opacity","0");
+    d3.selectAll(".names").style("opacity", "0");
+    // On each new load draw in United States line.
+    d3.selectAll("#United_States").style("opacity", "1");
 
+    // Allow menu changes to update axis values/scale and name locations.
     var stateUpdate = d3.transition(state);
 
     stateUpdate.select("path")
@@ -214,12 +243,11 @@ function redraw(error) {
                 return color(colors);
         };
     }
-
-    // Style states using choropleth coloring showing relationships for latest year of data.
+    // Style states using choropleth coloring
+    // showing relationships for latest year of data.
     var mapStates = america.selectAll("path")
         mapStates.style("fill", colorMap);
-    /* TO DO */
-    // Support state clicking for graph use.
-        // mapStates.on("click", );
+        // Implement state clicking to reveal state line on graph.
+        mapStates.on("click", uncoverLine);
 
 }
