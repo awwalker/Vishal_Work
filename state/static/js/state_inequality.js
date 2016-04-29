@@ -1,17 +1,9 @@
-/* TO DO */
-    // 1. Prettify coloring
-    // 2. Add line chart for comparisons
-    // 4. Code clean up
-/* CURRENTLY */
-    // Bad Choropleth...need to reset ranges at some point in future...
-    // Metrics linked to data/dropdown
-
-// Globals for viz production.
+// Globals for visualization production.
 var width  = 960,
     height = 500,
-    margin = {top: 20, right: 80, bottom: 30, left: 50},
-    chartWidth = 660 - margin.left - margin.right,
-    chartHeight = 400 - margin.top - margin.bottom,
+    margin = {top: 40, right: 80, bottom: 30, left: 200},
+    chartWidth = width - margin.left - margin.right,
+    chartHeight = height - margin.top - margin.bottom,
     x = d3.time.scale().range([0, chartWidth]),
     y = d3.scale.linear().range([chartHeight, 0]),
     centered;
@@ -51,6 +43,8 @@ var color = d3.scale.threshold()
                     .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
                     .range(["#F0F8FF", "#BBFFFF", "#BCD2EE", "#6D9BF1",
                             "#436EEE", "#2E37FE", "#3232CC", "00008B", "000033"]);
+// For graph lines coloring based on state name.
+var graphColor = d3.scale.category10();
 // Add map layers.
 var projection = d3.geo.albersUsa().scale(1000).translate([width / 2, height / 2]);
 var path       = d3.geo.path().projection(projection);
@@ -90,18 +84,22 @@ var yAxis = d3.svg.axis()
 
 // Function to refresh map and graph on dropdown change.
 function change() {
-    // clearTimeout(timeout);
     d3.transition()
       .duration(altKey ? 7500 : 1500)
       .each(redraw);
 }
-// Automatically change value after a few seconds.
-// var timeout = setTimeout(function() {
-//     menu.property("value", metrics[0]).node().focus();
-//     change();
-// }, 7000);
+// Handler for clicking on states - Reveals the line for that state.
+function uncoverLine() {
+    currentState = d3.select(this).attr("id");
+    // Reformat names with spaces to include _ instead.
+    if (currentState.includes(" ")){
+        res = currentState.split(" ");
+        currentState = res[0] + "_" + res[1];
+    }
+    d3.selectAll("#" + currentState).style("opacity", "1");
+}
 
-// Draw basic map template.
+// Must read in and draw map first so that data is used only after available.
 d3.json("../static/json/us-named.json", function(error, us) {
         drawMap(error, us);
         // Load CSV data for graph production/map manipulation.
@@ -114,6 +112,7 @@ d3.json("../static/json/us-named.json", function(error, us) {
         });
 });
 
+// Draw basic map template.
 function drawMap(error, us) {
     if (error) return error;
     d3.select("#Loading").style("display", "none") // Hide loading message.
@@ -121,7 +120,6 @@ function drawMap(error, us) {
         .data(topojson.feature(us, us.objects["states"]).features)
         .enter()
         .append("path")
-        // .style("fill", "red")
         .attr("id", function(d) {return d.properties.name;})
         .attr("d", path);
 
@@ -132,6 +130,7 @@ function drawMap(error, us) {
         .attr("id", "states-borders")
         .attr("d", path);
 }
+// Create choropleth coloring/line graph.
 function redraw(error) {
     if (error) return error;
     var nested = d3.nest()
@@ -161,16 +160,73 @@ function redraw(error) {
             })
         };
     });
-    // scale x / y domains according to current values.
+    // Create dynamic x / y domains according to current values.
     x.domain([
         d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return v.year; }); }),
         d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return v.year; }); })
     ]);
     y.domain([
-        d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return v.year; }); }),
-        d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return v. year; }); })
+        d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return v.stat; }); }),
+        d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return v.stat; }); })
     ]);
 
+    var state = chart.selectAll(".state")
+                     .data(transpose);
+    var stateEnter = state.enter().append("g")
+                          .attr("class", "state")
+                          .attr("id", function(d) {
+                              if ( d.name.includes(" ")) {
+                                  var res = d.name.split(" ");
+                                  return res[0] + "_" + res[1];
+                              }
+                              return d.name; });
+/* TO DO */
+// Restrict first call to graph drawing to just US line.
+// Only draw in other states when they are clicked.
+    stateEnter.append("path")
+              .attr("class", "line")
+              .attr("d", function(d) { return line(d.values); })
+              .attr("fill", "none")
+              .attr("id", function(d) {
+                  if ( d.name.includes(" ")) {
+                      var res = d.name.split(" ");
+                      return res[0] + "_" + res[1];
+                  }
+                  return d.name;
+               })
+              .style("stroke", function(d) { return graphColor(d.name); });
+    stateEnter.append("text")
+              .attr("class", "names")
+              .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+              .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.stat) + ")"; })
+              .attr("x", 4)
+              .attr("dy", ".1em")
+              .attr("id", function(d) {
+                  if ( d.name.includes(" ")) {
+                      var res = d.name.split(" ");
+                      return res[0] + "_" + res[1];
+                  }
+                  return d.name; })
+              .text(function(d) { return d.name; });
+    //Initially set all lines and names to not show
+    d3.selectAll(".line").style("opacity","0");
+    d3.selectAll(".names").style("opacity", "0");
+    // On each new load draw in United States line.
+    d3.selectAll("#United_States").style("opacity", "1");
+
+    // Allow menu changes to update axis values/scale and name locations.
+    var stateUpdate = d3.transition(state);
+
+    stateUpdate.select("path")
+               .attr("d", function(d) { return line(d.values); });
+
+    stateUpdate.select("text")
+               .attr("transform", function(d) { return "translate(" + x(d.values[d.values.length - 1].year) + "," + y(d.values[d.values.length - 1].stat) + ")";})
+    d3.transition(chart).select(".y.axis")
+                        .call(yAxis);
+    d3.transition(chart).select(".x.axis")
+                        .attr("transform", "translate(0," + chartHeight + ")")
+                        .call(xAxis);
     // Adjust map to selected metric simultaneously as graph is redrawn.
     function colorMap() {
         var currentState = d3.select(this).attr("id");
@@ -188,7 +244,11 @@ function redraw(error) {
                 return color(colors);
         };
     }
-    var state = america.selectAll("path")
-        state.style("fill", colorMap);
+    // Style states using choropleth coloring
+    // showing relationships for latest year of data.
+    var mapStates = america.selectAll("path")
+        mapStates.style("fill", colorMap);
+        // Implement state clicking to reveal state line on graph.
+        mapStates.on("click", uncoverLine);
 
 }
