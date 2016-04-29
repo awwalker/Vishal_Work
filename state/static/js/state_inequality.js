@@ -1,7 +1,7 @@
 // Globals for visualization production.
 var width  = 960,
     height = 500,
-    margin = {top: 40, right: 80, bottom: 30, left: 200},
+    margin = {top: 10, right: 130, bottom: 30, left: 50},
     chartWidth = width - margin.left - margin.right,
     chartHeight = height - margin.top - margin.bottom,
     x = d3.time.scale().range([0, chartWidth]),
@@ -18,7 +18,7 @@ var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Total Income",
                 "Adjusted Gross Income",
                 "Average Income",
-                "Consumer Price Index (CPI) 2014"
+                // "Consumer Price Index (CPI) 2014"
                 ];
 var checkOption = function(e) {
      if(e === metricselect) {
@@ -33,16 +33,39 @@ menu.selectAll("option")
     .data(d3.values(metrics))
     .enter()
     .append("option")
+    .attr("width", 200)
     .attr("value", function(d) {return d;})
     .text(function(d) {return d;});
 menu.selectAll("option").each(checkOption);
 
 // For choropleth coloring.
-// Need to add better range domain values...
-var color = d3.scale.threshold()
-                    .domain([ 1, 3, 10, 15, 20, 25, 30, 35, 40])
-                    .range(["#F0F8FF", "#BBFFFF", "#BCD2EE", "#6D9BF1",
-                            "#436EEE", "#2E37FE", "#3232CC", "00008B", "000033"]);
+var range = ["#edf8fb", "#b3cde3", "#9ebcda", "#8c96c6", "#8856a7", "#810f7c"];
+var colorRich10  = d3.scale.threshold()
+                     .domain([35, 40, 45, 50, 55, 61 ])
+                     .range(range),
+    colorRich5   = d3.scale.threshold()
+                     .domain([25, 30, 35, 40, 45, 51])
+                     .range(range)
+    colorRich1   = d3.scale.threshold()
+                     .domain([10, 15, 20, 25, 30, 35])
+                     .range(range),
+    colorRich05  = d3.scale.threshold()
+                     .domain([5, 10, 15, 20, 25, 30])
+                     .range(range),
+    colorRich01  = d3.scale.threshold()
+                     .domain([5, 8, 11, 14, 17, 20, 30])
+                     .range(range),
+    colorRich001 = d3.scale.threshold()
+                     .domain([1, 3, 5, 7, 9, 12])
+                     .range(range),
+    colorAvgInc  = d3.scale.threshold()
+                     .domain([30000, 40000, 50000, 60000, 70000, 80000])
+                     .range(range),
+    colorTotInc  = d3.scale.threshold()
+                     .domain([100000000, 200000000 , 400000000,  800000000, 1600000000, 3200000000 ])
+                     .range(range);
+
+
 // For graph lines coloring based on state name.
 var graphColor = d3.scale.category10();
 // Add map layers.
@@ -57,8 +80,8 @@ var america  = map.append("g")
                   .attr("id", "states");
 
 // To be used later.
-var altKey,
-    states;
+var states,
+    altKey;
 // Set up graph.
 var line = d3.svg.line()
              .interpolate("basis")
@@ -115,7 +138,8 @@ d3.json("../static/json/us-named.json", function(error, us) {
 // Draw basic map template.
 function drawMap(error, us) {
     if (error) return error;
-    d3.select("#Loading").style("display", "none") // Hide loading message.
+    // Hide loading message.
+    d3.select("#Loading").style("display", "none")
     america.selectAll("path")
         .data(topojson.feature(us, us.objects["states"]).features)
         .enter()
@@ -180,9 +204,6 @@ function redraw(error) {
                                   return res[0] + "_" + res[1];
                               }
                               return d.name; });
-/* TO DO */
-// Restrict first call to graph drawing to just US line.
-// Only draw in other states when they are clicked.
     stateEnter.append("path")
               .attr("class", "line")
               .attr("d", function(d) { return line(d.values); })
@@ -230,18 +251,32 @@ function redraw(error) {
     // Adjust map to selected metric simultaneously as graph is redrawn.
     function colorMap() {
         var currentState = d3.select(this).attr("id");
+        var currentMetric = d3.select("#metricselect").property("value");
         if(currentState != "Puerto Rico" &&
             currentState !="Virgin Islands of the United States" &&
             currentState != "states-borders") {
                 var colors = null;
-                transpose.forEach(function(data) {
-                    // Need additional check against ADJ GROSS INC...
-                    // Less Data means less indeces...cant go to 95...
-                    if (data.name == currentState) {
-                        colors = +data.values[95].stat;
-                    }
+                transpose.forEach(function(d) {
+                    if (d.name == currentState) {
+                        if (currentMetric != metrics[7]) {
+                            colors = +d.values[95].stat;
+                        }
+                        else{ // Three corrupted rows of data for Adj. Inc.
+                            colors = +d.values[92].stat;
+                        }
+                     }
                 });
-                return color(colors);
+                switch (currentMetric) {
+                    case metrics[0]: return colorRich10(colors);
+                    case metrics[1]: return colorRich5(colors);
+                    case metrics[2]: return colorRich1(colors);
+                    case metrics[3]: return colorRich05(colors);
+                    case metrics[4]: return colorRich01(colors);
+                    case metrics[5]: return colorRich001(colors);
+                    case metrics[6]: return colorTotInc(colors);
+                    case metrics[7]: return colorTotInc(colors);
+                    case metrics[8]: return colorAvgInc(colors);
+                }
         };
     }
     // Style states using choropleth coloring
