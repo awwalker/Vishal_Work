@@ -1,4 +1,6 @@
 // Globals for visualization production.
+// TODO update map values to highlight graph instead.
+// TODO work around dynamic domains to reflect only selected states.
 var width  = 960,
     height = 500,
     margin = {top: 10, right: 130, bottom: 30, left: 50},
