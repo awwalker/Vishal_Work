@@ -20,11 +20,7 @@ var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Average Income",
                 // "Consumer Price Index (CPI) 2014"
                 ];
-var checkOption = function(e) {
-     if(e === metricselect) {
-         return d3.select(this).attr("selected", "selected");
-     }
- };
+
 var menu = d3.select("#metric_drop")
              .append("select")
              .attr("id", "metricselect")
@@ -36,7 +32,6 @@ menu.selectAll("option")
     .attr("width", 200)
     .attr("value", function(d) {return d;})
     .text(function(d) {return d;});
-menu.selectAll("option").each(checkOption);
 
 // For choropleth coloring.
 var range = ["#edf8fb", "#b3cde3", "#9ebcda", "#8c96c6", "#8856a7", "#810f7c"];
@@ -80,8 +75,8 @@ var america  = map.append("g")
                   .attr("id", "states");
 
 // To be used later.
-var states,
-    altKey;
+var states;
+
 // Set up graph.
 var line = d3.svg.line()
              .interpolate("basis")
@@ -105,20 +100,24 @@ var yAxis = d3.svg.axis()
             chart.append("svg:g")
                .attr("class", "y axis");
 
+function removeSpaces(name){
+    if (name.includes(" ")) {
+        parts = name.split(" ");
+        name = parts[0] + "_" + parts[1];
+    }
+    return name;
+}
 // Function to refresh map and graph on dropdown change.
 function change() {
     d3.transition()
-      .duration(altKey ? 7500 : 1500)
+      .duration(1500)
       .each(redraw);
 }
 // Handler for clicking on states - Reveals the line for that state.
 function uncoverLine() {
     currentState = d3.select(this).attr("id");
     // Reformat names with spaces to include _ instead.
-    if (currentState.includes(" ")){
-        res = currentState.split(" ");
-        currentState = res[0] + "_" + res[1];
-    }
+    currentState = removeSpaces(currentState);
     d3.selectAll("#" + currentState).style("opacity", "1");
 }
 
@@ -198,23 +197,12 @@ function redraw(error) {
                      .data(transpose);
     var stateEnter = state.enter().append("g")
                           .attr("class", "state")
-                          .attr("id", function(d) {
-                              if ( d.name.includes(" ")) {
-                                  var res = d.name.split(" ");
-                                  return res[0] + "_" + res[1];
-                              }
-                              return d.name; });
+                          .attr("id", function(d) { return removeSpaces(d.name); });
     stateEnter.append("path")
               .attr("class", "line")
               .attr("d", function(d) { return line(d.values); })
               .attr("fill", "none")
-              .attr("id", function(d) {
-                  if ( d.name.includes(" ")) {
-                      var res = d.name.split(" ");
-                      return res[0] + "_" + res[1];
-                  }
-                  return d.name;
-               })
+              .attr("id", function(d) {return removeSpaces(d.name); })
               .style("stroke", function(d) { return graphColor(d.name); });
     stateEnter.append("text")
               .attr("class", "names")
@@ -222,12 +210,7 @@ function redraw(error) {
               .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.stat) + ")"; })
               .attr("x", 4)
               .attr("dy", ".1em")
-              .attr("id", function(d) {
-                  if ( d.name.includes(" ")) {
-                      var res = d.name.split(" ");
-                      return res[0] + "_" + res[1];
-                  }
-                  return d.name; })
+              .attr("id", function(d) { return removeSpaces(d.name); })
               .text(function(d) { return d.name; });
     //Initially set all lines and names to not show
     d3.selectAll(".line").style("opacity","0");
