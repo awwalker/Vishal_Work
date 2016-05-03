@@ -33,7 +33,7 @@ menu.selectAll("option")
     .attr("value", function(d) {return d;})
     .text(function(d) {return d;});
 
-// For choropleth coloring.
+// Set up choropleth coloring.
 var range = ["#edf8fb", "#b3cde3", "#9ebcda", "#8c96c6", "#8856a7", "#810f7c"];
 var colorRich10  = d3.scale.threshold()
                      .domain([35, 40, 45, 50, 55, 61 ])
@@ -60,9 +60,6 @@ var colorRich10  = d3.scale.threshold()
                      .domain([100000000, 200000000 , 400000000,  800000000, 1600000000, 3200000000 ])
                      .range(range);
 
-
-// For graph lines coloring based on state name.
-var graphColor = d3.scale.category10();
 // Add map layers.
 var projection = d3.geo.albersUsa().scale(1000).translate([width / 2, height / 2]);
 var path       = d3.geo.path().projection(projection);
@@ -99,7 +96,11 @@ var yAxis = d3.svg.axis()
               .orient("left")
             chart.append("svg:g")
                .attr("class", "y axis");
+// Set up graph lines coloring based on state name.
+var graphColor = d3.scale.category10();
 
+// removeSpaces - ID tags cannot have spaces in them so states with spaces in name
+// should instead have '_'
 function removeSpaces(name){
     if (name.includes(" ")) {
         parts = name.split(" ");
