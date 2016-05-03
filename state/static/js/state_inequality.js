@@ -18,7 +18,6 @@ var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Total Income",
                 "Adjusted Gross Income",
                 "Average Income",
-                // "Consumer Price Index (CPI) 2014"
                 ];
 
 var menu = d3.select("#metric_drop")
@@ -115,11 +114,27 @@ function change() {
       .each(redraw);
 }
 // Handler for clicking on states - Reveals the line for that state.
+// TODO handle the names appearing/disappearing as well.
 function uncoverLine() {
-    currentState = d3.select(this).attr("id");
-    // Reformat names with spaces to include _ instead.
-    currentState = removeSpaces(currentState);
-    d3.selectAll("#" + currentState).style("opacity", "1");
+    currentState = d3.select(this)
+    currentStateName = currentState.attr("id");
+    // Translate any names with spaces so that they can be recognized.
+    formattedStateName = removeSpaces(currentStateName);
+    // Select the chart value.
+    selectedState = d3.select("#" + formattedStateName + "-chart");
+    // Select the line part of the current state.
+    selectedStateLine = selectedState.selectAll(".line");
+    // Toggle the line drawn/not drawn based on whether it is currently drawn.
+    selectedStateLine.style("opacity", function() {
+        if(selectedStateLine.attr("isDrawn") == "true") {
+            selectedStateLine.attr("isDrawn", "false");
+            return "0";
+        } else {
+            selectedStateLine.attr("isDrawn", "true");
+            return "1";
+        }
+    })
+
 }
 
 // Must read in and draw map first so that data is used only after available.
@@ -190,20 +205,20 @@ function redraw(error) {
         d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return v.year; }); })
     ]);
     y.domain([
-        d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return v.stat; }); }),
-        d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return v.stat; }); })
+        d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return +v.stat; }); }),
+        d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return +v.stat; }); })
     ]);
 
     var state = chart.selectAll(".state")
                      .data(transpose);
     var stateEnter = state.enter().append("g")
                           .attr("class", "state")
-                          .attr("id", function(d) { return removeSpaces(d.name); });
+                          .attr("id", function(d) { return removeSpaces(d.name) + "-chart"; });
     stateEnter.append("path")
               .attr("class", "line")
               .attr("d", function(d) { return line(d.values); })
               .attr("fill", "none")
-              .attr("id", function(d) {return removeSpaces(d.name); })
+              .attr("id", function(d) {return removeSpaces(d.name) + "-line"; })
               .style("stroke", function(d) { return graphColor(d.name); });
     stateEnter.append("text")
               .attr("class", "names")
@@ -213,11 +228,18 @@ function redraw(error) {
               .attr("dy", ".1em")
               .attr("id", function(d) { return removeSpaces(d.name); })
               .text(function(d) { return d.name; });
-    //Initially set all lines and names to not show
-    d3.selectAll(".line").style("opacity","0");
+    // Initially set all lines and names to not show
+    d3.selectAll(".line")
+      .attr("isDrawn", "false")
+      .style("opacity","0");
+
     d3.selectAll(".names").style("opacity", "0");
     // On each new load draw in United States line.
-    d3.selectAll("#United_States").style("opacity", "1");
+    United_States = d3.select("#United_States-chart");
+    USLine = United_States.selectAll(".line")
+                          .attr("isDrawn", "true")
+                          .style("opacity", "1");
+
 
     // Allow menu changes to update axis values/scale and name locations.
     var stateUpdate = d3.transition(state);
