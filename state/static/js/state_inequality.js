@@ -1,13 +1,18 @@
 // Globals for visualization production.
 // TODO update map values to highlight graph instead.
 // TODO work around dynamic domains to reflect only selected states.
-var width  = 960,
-    height = 500,
-    margin = {top: 10, right: 130, bottom: 30, left: 50},
-    chartWidth = width - margin.left - margin.right,
-    chartHeight = height - margin.top - margin.bottom,
-    x = d3.time.scale().range([0, chartWidth]),
-    y = d3.scale.linear().range([chartHeight, 0]),
+// var width  = 960,
+//     height = 500,
+//     margin = {top: 10, right: 130, bottom: 30, left: 50},
+//     chartWidth = width - margin.left - margin.right,
+//     chartHeight = height - margin.top - margin.bottom,
+var margin      = {top: 10, right: 130, bottom: 30, left: 50},
+    mapWidth    = 500,
+    mapHeight   = 300,
+    chartWidth  = 960 - margin.left - margin.right,
+    chartHeight = 500 - margin.top - margin.bottom,
+    x           = d3.time.scale().range([0, chartWidth]),
+    y           = d3.scale.linear().range([chartHeight, 0]),
     centered;
 // Set up dropdown.
 // Variables for selection.
@@ -62,11 +67,11 @@ var colorRich10  = d3.scale.threshold()
                      .range(range);
 
 // Add map layers.
-var projection = d3.geo.albersUsa().scale(1000).translate([width / 2, height / 2]);
+var projection = d3.geo.albersUsa().scale(1000).translate([mapWidth / 2, mapHeight / 2]);
 var path       = d3.geo.path().projection(projection);
 var map        = d3.select("#map").append("svg")
-                   .attr("width", width)
-                   .attr("height", height)
+                   .attr("width", mapWidth)
+                   .attr("height", mapHeight)
                    .append("g");
 // Base layer to interact with.
 var america  = map.append("g")
