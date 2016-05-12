@@ -143,7 +143,6 @@ function uncoverLine() {
     })
 
 }
-
 // Must read in and draw map first so that data is used only after available.
 d3.json("../static/json/us-named.json", function(error, us) {
         drawMap(error, us);
@@ -156,7 +155,6 @@ d3.json("../static/json/us-named.json", function(error, us) {
                 redraw(error);
         });
 });
-
 // Draw basic map template.
 function drawMap(error, us) {
     if (error) return error;
@@ -193,7 +191,6 @@ function redraw(error) {
     var keyring = d3.keys(data[0]).filter(function(key) {
         return (key !== "Label 2" && key !== "Year" && key !== "Label");
     });
-
     // Get the year and related statistics and map them to each state separately.
     // This is data only pertaining to the selected statistic / menu selection.
     // Key = state name; Value = Array of objects w/ statval / year.
@@ -215,7 +212,7 @@ function redraw(error) {
         d3.min(transpose, function(c) { return d3.min(c.values, function(v) { return +v.stat; }); }),
         d3.max(transpose, function(c) { return d3.max(c.values, function(v) { return +v.stat; }); })
     ]);
-
+    // Add states to graph.
     var state = chart.selectAll(".state")
                      .data(transpose);
     var stateEnter = state.enter().append("g")
@@ -237,23 +234,19 @@ function redraw(error) {
               .text(function(d) { return d.name; });
     // Initially set all lines and names to not show
     d3.selectAll(".line")
-      .attr("isDrawn", "false")
+      .attr("isDrawn", "false") // Monitor which lines have been drawn so far.
       .style("opacity","0");
-
     d3.selectAll(".names").style("opacity", "0");
     // On each new load draw in United States line.
     United_States = d3.select("#United_States-chart");
     USLine = United_States.selectAll(".line")
                           .attr("isDrawn", "true")
                           .style("opacity", "1");
-
-
     // Allow menu changes to update axis values/scale and name locations.
     var stateUpdate = d3.transition(state);
-
     stateUpdate.select("path")
                .attr("d", function(d) { return line(d.values); });
-
+    // TODO: Allow text to reappear with lines.
     stateUpdate.select("text")
                .attr("transform", function(d) { return "translate(" + x(d.values[d.values.length - 1].year) + "," + y(d.values[d.values.length - 1].stat) + ")";})
     d3.transition(chart).select(".y.axis")
@@ -279,7 +272,7 @@ function redraw(error) {
                         }
                      }
                 });
-                switch (currentMetric) {
+                switch (currentMetric) { // Select correct color scheme.
                     case metrics[0]: return colorRich10(colors);
                     case metrics[1]: return colorRich5(colors);
                     case metrics[2]: return colorRich1(colors);
