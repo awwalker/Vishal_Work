@@ -1,6 +1,7 @@
 // Globals for visualization production.
 // TODO update map values to highlight graph instead.
 // TODO work around dynamic domains to reflect only selected states.
+// TODO remove...
 // var width  = 960,
 //     height = 500,
 //     margin = {top: 10, right: 130, bottom: 30, left: 50},
@@ -26,7 +27,6 @@ var metrics = ["Share of Total Wealth Earned by Richest 10%",
                 "Adjusted Gross Income",
                 "Average Income",
                 ];
-
 var menu = d3.select("#metric_drop")
              .append("select")
              .attr("id", "metricselect")
@@ -38,7 +38,6 @@ menu.selectAll("option")
     .attr("width", 200)
     .attr("value", function(d) {return d;})
     .text(function(d) {return d;});
-
 // Set up choropleth coloring.
 var range = ["#edf8fb", "#b3cde3", "#9ebcda", "#8c96c6", "#8856a7", "#810f7c"];
 var colorRich10  = d3.scale.threshold()
@@ -65,7 +64,6 @@ var colorRich10  = d3.scale.threshold()
     colorTotInc  = d3.scale.threshold()
                      .domain([100000000, 200000000 , 400000000,  800000000, 1600000000, 3200000000 ])
                      .range(range);
-
 // Add map layers.
 var projection = d3.geo.albersUsa().scale(1000).translate([mapWidth / 2, mapHeight / 2]);
 var path       = d3.geo.path().projection(projection);
@@ -76,10 +74,8 @@ var map        = d3.select("#map").append("svg")
 // Base layer to interact with.
 var america  = map.append("g")
                   .attr("id", "states");
-
-// To be used later.
+// TODO: Remove...To be used later.
 var states;
-
 // Set up graph.
 var line = d3.svg.line()
              .interpolate("basis")
@@ -104,7 +100,6 @@ var yAxis = d3.svg.axis()
                .attr("class", "y axis");
 // Set up graph lines coloring based on state name.
 var graphColor = d3.scale.category10();
-
 // removeSpaces - ID tags cannot have spaces in them so states with spaces in name
 // should instead have '_'
 function removeSpaces(name){
@@ -141,7 +136,6 @@ function uncoverLine() {
             return "1";
         }
     })
-
 }
 // Must read in and draw map first so that data is used only after available.
 d3.json("../static/json/us-named.json", function(error, us) {
@@ -166,7 +160,6 @@ function drawMap(error, us) {
         .append("path")
         .attr("id", function(d) {return d.properties.name;})
         .attr("d", path);
-
     america.append("path")
         .datum(topojson.mesh(us, us.objects.states, function(a,b) {
             return a!==b;
@@ -180,13 +173,10 @@ function redraw(error) {
     var nested = d3.nest()
                    .key(function(d) { return d.Label; })
                    .map(states)
-
     // Selected menu item.
     var series = menu.property("value");
-
     // Retrieve only data for selected metric (all states / all years).
     var data = nested[series];
-
     // keys are each individual state & DC stored in array.
     var keyring = d3.keys(data[0]).filter(function(key) {
         return (key !== "Label 2" && key !== "Year" && key !== "Label");
