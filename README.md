@@ -1,5 +1,7 @@
 # Visualization Work
 
+[![Join the chat at https://gitter.im/awwalker/Vishal_Work](https://badges.gitter.im/awwalker/Vishal_Work.svg)](https://gitter.im/awwalker/Vishal_Work?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Current Projects:
 
 ### State Inequality:
